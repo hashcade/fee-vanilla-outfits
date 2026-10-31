@@ -1,0 +1,5 @@
+/target/
+/dist/
+/cheats/
+__pycache__/
+*.pyc

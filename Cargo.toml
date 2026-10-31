@@ -1,0 +1,27 @@
+[package]
+name = "fee-vanilla-outfits"
+version = "0.1.0"
+edition = "2021"
+description = "Keep default character outfits after reclassing in Fire Emblem Engage."
+license = "MIT"
+repository = "https://github.com/hashcade/fee-vanilla-outfits"
+publish = false
+
+[package.metadata.skyline]
+titleid = "0100A6301214E000"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[target.'cfg(target_os = "switch")'.dependencies]
+skyline = { git = "https://github.com/ultimate-research/skyline-rs.git", rev = "6b52d321275639f26c2371d8142550ba0013a5e4" }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("switch"))'] }
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true

@@ -1,0 +1,44 @@
+name: validate
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --check
+      - run: cargo test --locked
+      - run: python3 -m unittest discover -s scripts -p 'test_*.py'
+      - run: python3 scripts/release.py --check
+
+  switch:
+    runs-on: ubuntu-latest
+    container: wuboyth/skyline-plugin-builder:latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/cache@v5
+        with:
+          path: |
+            /usr/local/cargo/registry
+            /usr/local/cargo/git
+            target
+          key: skyline-${{ runner.os }}-${{ hashFiles('Cargo.lock', 'Cargo.toml') }}
+          restore-keys: skyline-${{ runner.os }}-
+      - run: cargo skyline build --release -- --locked
+      - name: Verify Cobalt imports and package NRO
+        run: python3 scripts/package.py target/aarch64-skyline-switch/release/libfee_vanilla_outfits.nro --version "$(tr -d '[:space:]' < VERSION)"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fee-vanilla-outfits
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14

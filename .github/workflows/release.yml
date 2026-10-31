@@ -1,0 +1,55 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  release:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Verify release version
+        run: test "$GITHUB_REF_NAME" = "v$(python3 scripts/release.py --check)"
+      - uses: actions/download-artifact@v8
+        with:
+          name: fee-vanilla-outfits
+          path: dist
+      - name: Verify checksums
+        working-directory: dist
+        run: sha256sum --check SHA256SUMS
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - name: Generate release notes
+        run: |
+          previous_release=$(gh release list --exclude-drafts --exclude-pre-releases --json tagName --jq 'map(select(.tagName != env.GITHUB_REF_NAME)) | .[0].tagName // empty')
+          if [ -n "$previous_release" ]; then
+            npx changelogithub --from "$previous_release" --to "$GITHUB_REF_NAME"
+          else
+            npx changelogithub --to "$GITHUB_REF_NAME"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish artifacts
+        run: gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify downloadable artifacts
+        run: |
+          gh release download "$GITHUB_REF_NAME" --dir downloaded
+          cd downloaded
+          sha256sum --check SHA256SUMS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
