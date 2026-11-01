@@ -1,7 +1,7 @@
 //! Original character battle clothing, without custom save data.
 
 pub mod catalog;
-#[cfg(target_os = "switch")]
+#[cfg(any(target_os = "switch", test))]
 mod native;
 #[cfg(target_os = "switch")]
 pub(crate) mod plugin;

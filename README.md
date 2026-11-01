@@ -1,11 +1,12 @@
 # FEE Vanilla Outfits
 
-Keep each character's default (original class) outfit after reclassing in ordinary battles and preparation models in **Fire Emblem Engage 2.0.0**, with **Cobalt 1.31.0**.
+Keep each character's default (original class) outfit after reclassing in ordinary battles, preparation models and dialogue portraits in **Fire Emblem Engage 2.0.0**, with **Cobalt 1.31.0**.
 
 ## Features
 
 - Keep a character's original outfit after reclassing, including Panette's original Berserker dress.
 - Cover the original playable roster and DLC allies, with both Alear genders.
+- Apply the same original outfit to 3D dialogue portraits, preserving native expressions and dialogue animations.
 - Keep native hair, weapons, mounts, animation rigs and engaged forms. Incompatible rigs keep their original appearance.
 - Change only transient model dress references: no custom items, unlocks or save variables. Removing the mod restores native appearance rules when models reload.
 - No settings or additional menus. Existing models refresh when rebuilt.

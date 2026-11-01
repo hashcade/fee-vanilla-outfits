@@ -134,3 +134,7 @@ pub const OUTFITS: &[Outfit] = &[
 pub fn find(pid: &str, dress_gender: i32) -> Option<&'static Outfit> {
   OUTFITS.iter().find(|outfit| outfit.pid == pid && outfit.gender == dress_gender)
 }
+
+pub fn find_by_rig(pid: &str, rig: &str) -> Option<&'static Outfit> {
+  OUTFITS.iter().find(|outfit| outfit.pid == pid && outfit.rig == rig)
+}

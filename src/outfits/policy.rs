@@ -17,7 +17,24 @@ pub fn compatible_dress(current_rig: &str, outfit: &Outfit) -> bool {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::outfits::catalog::{find, OUTFITS};
+  use crate::outfits::catalog::{find, find_by_rig, OUTFITS};
+
+  #[test]
+  fn dialogue_can_resolve_every_outfit_without_a_unit_or_current_job() {
+    let unique: std::collections::HashSet<_> = OUTFITS.iter().map(|x| (x.pid, x.rig)).collect();
+    assert_eq!(unique.len(), OUTFITS.len());
+    for outfit in OUTFITS {
+      let resolved = find_by_rig(outfit.pid, outfit.rig).unwrap();
+      assert_eq!(
+        (resolved.pid, resolved.gender, resolved.dress),
+        (outfit.pid, outfit.gender, outfit.dress)
+      );
+    }
+    assert_eq!(find_by_rig("PID_リュール", "uRig_HumnM1").unwrap().gender, 1);
+    assert_eq!(find_by_rig("PID_リュール", "uRig_HumnF1").unwrap().gender, 2);
+    assert!(find_by_rig("PID_パネトネ", "uRig_HumnM1").is_none());
+    assert!(find_by_rig("PID_不明", "uRig_HumnF1").is_none());
+  }
 
   #[test]
   fn panette_maps_to_her_original_berserker_dress_after_reclass() {

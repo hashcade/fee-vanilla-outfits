@@ -1,16 +1,21 @@
-use super::{policy, profile};
+use super::{catalog, policy, profile};
 use core::{ffi::c_void, ptr};
 
 pub type Object = *mut c_void;
 pub type Method = *const c_void;
 
+#[cfg(not(test))]
 fn base() -> usize {
   unsafe { skyline::hooks::getRegionAddress(skyline::hooks::Region::Text) as usize }
 }
 
 unsafe fn function<T: Copy>(offset: usize) -> T {
   // All call sites use function pointers pinned by offline NSO verification.
-  unsafe { core::mem::transmute_copy(&(base() + offset)) }
+  #[cfg(not(test))]
+  let address = base() + offset;
+  #[cfg(test)]
+  let address = tests::function_address(offset);
+  unsafe { core::mem::transmute_copy(&address) }
 }
 
 pub unsafe fn read<T: Copy + Default>(object: Object, offset: usize) -> T {
@@ -55,9 +60,21 @@ pub unsafe fn apply_original_dress(unit: Object, result: Object) {
   let get_pid: extern "C" fn(Object, Method) -> Object = unsafe { function(profile::GET_PID) };
   let get_gender: extern "C" fn(Object, Method) -> i32 = unsafe { function(profile::DRESS_GENDER) };
   let Some(pid) = (unsafe { string(get_pid(unit, ptr::null())) }) else { return };
-  let Some(outfit) = crate::outfits::catalog::find(&pid, get_gender(unit, ptr::null())) else {
+  let Some(outfit) = catalog::find(&pid, get_gender(unit, ptr::null())) else {
     return;
   };
+  unsafe { apply_dress(outfit, result) };
+}
+
+/// PID-based dialogue requests have no Unit; the resolved rig selects Alear's gender.
+pub unsafe fn apply_original_dress_from_result(result: Object) {
+  let Some(pid) = (unsafe { string(read(result, 0x10)) }) else { return };
+  let Some(rig) = (unsafe { string(read(result, 0x20)) }) else { return };
+  let Some(outfit) = catalog::find_by_rig(&pid, &rig) else { return };
+  unsafe { apply_dress(outfit, result) };
+}
+
+unsafe fn apply_dress(outfit: &catalog::Outfit, result: Object) {
   let Some(rig) = (unsafe { string(read(result, 0x20)) }) else { return };
   if !policy::compatible_dress(&rig, outfit) {
     return;
@@ -83,3 +100,6 @@ pub unsafe fn apply_original_dress(unit: Object, result: Object) {
   let set: extern "C" fn(Object, Object, Method) = unsafe { function(profile::SET_DRESS) };
   set(result, dress, ptr::null());
 }
+
+#[cfg(test)]
+mod tests;
