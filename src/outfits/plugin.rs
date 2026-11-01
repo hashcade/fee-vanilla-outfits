@@ -10,7 +10,8 @@ pub fn install() {
     get_from_unit,
     get_unit_info,
     get_for_talk_pid,
-    get_for_talk_unit
+    get_for_talk_unit,
+    get_for_kizuna
   );
 }
 
@@ -72,6 +73,15 @@ fn get_for_talk_unit(unit: Object, method: Method) -> Object {
     unsafe {
       native::apply_original_dress(unit, result);
     }
+  }
+  result
+}
+
+#[skyline::hook(offset = profile::AFTER_BATTLE)]
+fn get_for_kizuna(pid: Object, conditions: Object, method: Method) -> Object {
+  let result = call_original!(pid, conditions, method);
+  unsafe {
+    native::apply_original_dress_from_result(result);
   }
   result
 }

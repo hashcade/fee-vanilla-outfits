@@ -126,6 +126,23 @@ fn absent_dialogue_results_do_not_call_native_functions() {
 }
 
 #[test]
+fn post_battle_kagetsu_keeps_swordmaster_clothes_after_reclassing_to_wyvern() {
+  let mut fields = result("PID_カゲツ", "uRig_HumnM1", "current_wyvern_dress");
+  fields[0x170 / 8] = il_string("AOC_Talk_c302") as usize;
+  fields[0x180 / 8] = il_string("AOC_Hub_Hum2M") as usize;
+  let before = fields;
+  unsafe {
+    apply_original_dress_from_result(fields.as_mut_ptr().cast());
+    assert_eq!(string(fields[0x28 / 8] as Object).as_deref(), Some("uBody_Swd1AM_c302"));
+  }
+  for index in 0..fields.len() {
+    if index != 0x28 / 8 {
+      assert_eq!(fields[index], before[index]);
+    }
+  }
+}
+
+#[test]
 fn native_scene_conditions_and_engage_state_are_preserved() {
   let mut array = [0usize; 6];
   array[0x18 / 8] = 2;

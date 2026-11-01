@@ -66,7 +66,7 @@ pub unsafe fn apply_original_dress(unit: Object, result: Object) {
   unsafe { apply_dress(outfit, result) };
 }
 
-/// PID-based dialogue requests have no Unit; the resolved rig selects Alear's gender.
+/// PID-based dialogue/exploration requests use the resolved rig to select Alear's gender.
 pub unsafe fn apply_original_dress_from_result(result: Object) {
   let Some(pid) = (unsafe { string(read(result, 0x10)) }) else { return };
   let Some(rig) = (unsafe { string(read(result, 0x20)) }) else { return };
