@@ -93,6 +93,17 @@ def verify_game(path: Path) -> int:
     offset = int(address, 16)
     if text[offset:offset + len(expected)] != expected:
       raise ValueError(f"instruction mismatch at {address}")
+  # Independently decode the literal slot loaded by the native opening. This
+  # checks the plugin's data address as well as the pinned instruction bytes.
+  slot = int(re.search(r"pub const ENGAGE_START_LITERAL: usize = (0x[0-9A-Fa-f]+)", catalog_profile)[1], 16)
+  pc = 0x01BD7CDC
+  adrp, load = struct.unpack_from("<II", text, pc)
+  immediate = ((adrp >> 5) & 0x7FFFF) << 2 | ((adrp >> 29) & 3)
+  if immediate & 0x100000:
+    immediate -= 0x200000
+  native_slot = (pc & ~0xFFF) + (immediate << 12) + (((load >> 10) & 0xFFF) << 3)
+  if native_slot != slot:
+    raise ValueError("Engage opening literal slot does not match the native load")
   return len(windows)
 
 

@@ -5,6 +5,7 @@ Keep each character's default (original class) outfit after reclassing in ordina
 ## Features
 
 - Keep a character's original outfit after reclassing, including Panette's original Berserker dress.
+- Keep the same outfit in the pre-transformation part of Engage and Engage+ animations; retain the native transformed appearances and effects.
 - Cover the original playable roster and DLC allies, with both Alear genders.
 - Apply the same original outfit to 3D dialogue portraits, preserving native expressions and dialogue animations.
 - Keep original outfits during post-battle exploration without changing Somniel casual outfits or exploration animations.

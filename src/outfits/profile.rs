@@ -9,6 +9,8 @@ pub const GET_PID: usize = 0x01A35BF0;
 pub const DRESS_GENDER: usize = 0x01A232E0;
 pub const STRING_NEW_SIZE: usize = 0x0044A168;
 pub const SET_DRESS: usize = 0x01BB1D10;
+// The string-literal cell used by EngageSequence's Cast.Import calls.
+pub const ENGAGE_START_LITERAL: usize = 0x0628D910;
 
 pub const TEXT_SIGNATURES: &[(usize, [u32; 4])] = &[
   (0x02B0EA10, [0xA9BC7BFD, 0xA9015FF8, 0x910003FD, 0xA90257F6]),
@@ -40,4 +42,13 @@ pub const TEXT_SIGNATURES: &[(usize, [u32; 4])] = &[
   (0x02A5F13C, [0xF9400100, 0xAA1F03E2, 0x97C55C9F, 0x14000042]),
   (0x02A5F37C, [0xAA1303E0, 0xAA1403E1, 0x710012BF, 0x54000081]),
   (0x02A5F398, [0xAA1F03E2, 0x97C55C09, 0x9001C188, 0xF9419508]),
+  // EngageSequence resolves its opening literal before creating the Cast array.
+  (0x01BD7CDC, [0xD00235B6, 0xF9448AD6, 0xAA0003F5, 0xF94002C0]),
+  // Both player Casts import their Unit with the same opening-condition array.
+  (0x01BD7D48, [0xF9400B01, 0xB40000E1, 0xF9401300, 0x52800022]),
+  (0x01BD7E5C, [0xF9400B01, 0xB40000E1, 0xF9401300, 0x52800022]),
+  // CharacterAppearance merges conditions by reference, not by recreating strings.
+  (0x02B0ED30, [0x8B28CE80, 0xAA1503E1, 0xF8020C15, 0x97660C9D]),
+  // The detailed opening is started before the unit's Engaging flag is applied.
+  (0x01E36878, [0x52A01001, 0xD63F0120, 0xF9400AC8, 0xEA00011F]),
 ];

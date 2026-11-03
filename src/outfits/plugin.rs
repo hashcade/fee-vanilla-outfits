@@ -34,11 +34,12 @@ fn get_from_unit(
   if result.is_null() || !scope::contains(unit as usize) {
     return result;
   }
+  let engage_start = unsafe { native::is_engage_start(conditions) };
   let Some(conditions) = (unsafe { native::conditions(conditions) }) else {
     return result;
   };
   let state = unsafe { native::engage_state(unit) };
-  if policy::ordinary_request(mode, state, &conditions) {
+  if policy::battle_request(mode, state, engage_start, &conditions) {
     unsafe {
       native::apply_original_dress(unit, result);
     }

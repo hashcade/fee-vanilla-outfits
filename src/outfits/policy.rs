@@ -1,13 +1,19 @@
 use super::catalog::Outfit;
 
-pub fn ordinary_request(mode: i32, engage_state: i32, conditions: &[String]) -> bool {
+pub fn battle_request(
+  mode: i32,
+  engage_state: i32,
+  engage_start: bool,
+  conditions: &[String],
+) -> bool {
   mode == 2
     && engage_state == 0
-    && !conditions.iter().any(|condition| {
-      ["私服", "情報", "会話", "デモ", "エンゲージ", "変身"]
-        .iter()
-        .any(|blocked| condition.contains(blocked))
-    })
+    && (engage_start
+      || !conditions.iter().any(|condition| {
+        ["私服", "情報", "会話", "デモ", "エンゲージ", "変身"]
+          .iter()
+          .any(|blocked| condition.contains(blocked))
+      }))
 }
 
 pub fn compatible_dress(current_rig: &str, outfit: &Outfit) -> bool {
@@ -83,16 +89,29 @@ mod tests {
 
   #[test]
   fn battle_scope_excludes_other_scenes_and_engaged_forms() {
-    assert!(ordinary_request(2, 0, &[]));
+    assert!(battle_request(2, 0, false, &[]));
     for mode in [0, 1, 3, 4, -1] {
-      assert!(!ordinary_request(mode, 0, &[]));
+      assert!(!battle_request(mode, 0, false, &[]));
     }
     for state in 1..=4 {
-      assert!(!ordinary_request(2, state, &[]));
+      assert!(!battle_request(2, state, false, &[]));
     }
     for condition in ["私服", "情報", "会話", "デモ", "エンゲージ中", "超エンゲージ中", "変身"]
     {
-      assert!(!ordinary_request(2, 0, &[condition.to_owned()]));
+      assert!(!battle_request(2, 0, false, &[condition.to_owned()]));
+    }
+  }
+
+  #[test]
+  fn native_engage_opening_changes_only_the_pre_transformation_battle_model() {
+    let conditions = ["エンゲージ開始".to_owned(), "デモ".to_owned()];
+    assert!(battle_request(2, 0, true, &conditions));
+    assert!(!battle_request(2, 0, false, &conditions));
+    for state in 1..=4 {
+      assert!(!battle_request(2, state, true, &conditions));
+    }
+    for mode in [0, 1, 3, 4, -1] {
+      assert!(!battle_request(mode, 0, true, &conditions));
     }
   }
 }
